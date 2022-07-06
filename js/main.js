@@ -48,12 +48,18 @@ METHOD: instatiate the canvas, set the context, etc
 	//set the necessary variables
 	init() {
 	  this.blobs = [];
+	  this.offenseBlobs = []
 	  this.currentAsset = null;
   
 	  // Make blobs
-	  for (let i = 0; i < 300; i++) {
+	  for (let i = 0; i < 55; i++) {
 		let blob = new Blob(this.bufferCanvas, this.bufferCtx);
 		this.blobs.push(blob);
+	  }
+
+	  for (let i = 0; i < 10; i++) {
+		let blob = new Blob(this.bufferCanvas, this.bufferCtx);
+		this.offenseBlobs.push(blob);
 	  }
   
 	  // add a listener for resizing
@@ -81,12 +87,15 @@ METHOD: instatiate the canvas, set the context, etc
 	  this.blobs.forEach((b) => {
 		b.transition();
 	  });
+	  this.offenseBlobs.forEach((b) => {
+		b.transition();
+	  });
 	  setTimeout(() => {
 		let asset = Object.keys(this.assets)[this.currentAssetIndex];
 		this.wrh =
 		  this.assets[asset].asset.width / this.assets[asset].asset.height;
 		this.currentAsset = this.assets[asset];
-	  }, 1500);
+	  }, 500);
 	}
   
 	//render the rorschach test. first, check to see that there is an asset loaded. then, clear the context.
@@ -100,6 +109,11 @@ METHOD: instatiate the canvas, set the context, etc
 		this.blobs.forEach((b) => {
 		  b.update();
 		});
+
+		this.offenseBlobs.forEach((b) => {
+			b.updateRed();
+		  });
+
   
 		// Take the buffer, cut it in half and flip it to mirror
 		this.bufferCtx.save();
@@ -156,17 +170,18 @@ METHOD: there will be hundreds of blobs per  rorschach test
 	}
   // keep the blobs within bounds
 	get targetWidth() {
-	  let ran = Between(-50, 50);
+	  let ran = Between(-40, 40);
 	  return this.canvas.width + ran / 2;
 	}
 	get targetHeight() {
-	  let ran = Between(-50, 50);
+	  let ran = Between(-40, 40);
 	  return this.canvas.height - ran;
 	}
   
 	// the update function that causes the blobs to continuously move around. this is where the player stats will come in handy
 	update() {
-	  this.ctx.fillStyle = `rgba(0,0,0, ${this.options.opacity})`;
+	  this.ctx.fillStyle = `rgba(46,204,113, ${this.options.opacity})`;
+	  this.ctx.strokeStyle = `#333`;
 	  this.ctx.beginPath();
 	  this.ctx.arc(
 		this.options.x,
@@ -176,13 +191,29 @@ METHOD: there will be hundreds of blobs per  rorschach test
 		2 * Math.PI
 	  );
 	  this.ctx.fill();
+	  //this.ctx.stroke();
+	}
+
+		// the update function that causes the blobs to continuously move around. this is where the player stats will come in handy
+	updateRed() {
+			this.ctx.fillStyle = `rgba(0,0,0, ${this.options.opacity})`;
+			this.ctx.strokeStyle = `#333`;
+			this.ctx.beginPath();
+			this.ctx.arc(
+			  this.options.x,
+			  this.options.y,
+			  this.options.radius,
+			  1,
+			  2 * Math.PI
+			);
+			this.ctx.fill();
 	}
   
 	// this is when the blobs first load, and the Between determins the amount of seconds it takes for them to grow in size
 	grow() {
 	  if (this.tween) this.tween.kill();
 	  this.tween = TweenMax.to(this.options, Between(0.5, 1), {
-		radius: Between(3.5, 5.5),
+		radius: Between(18, 23),
 		x: Between(-this.targetWidth, this.targetWidth),
 		y: Between(-this.targetHeight, this.targetHeight),
 		opacity: 1,
@@ -196,7 +227,7 @@ METHOD: there will be hundreds of blobs per  rorschach test
 	live() {
 	  if (this.tween) this.tween.kill();
 	  this.tween = TweenMax.to(this.options, 4.9, {
-		radius: Between(3.5, 5.5),
+		radius: Between(18, 23),
 		x: Between(-this.targetWidth, this.targetWidth),
 		y: Between(-this.targetHeight, this.targetHeight),
 		opacity: 1,
@@ -211,17 +242,17 @@ METHOD: there will be hundreds of blobs per  rorschach test
 	  if (this.tween) this.tween.kill();
 	  this.tween = TweenMax.to(this.options, 1, {
 		opacity: 0,
-		radius: 6,
+		radius: Between(18, 23),
 		onComplete: () => {
 		  this.options = {
 			radius: 0,
-			x: this.canvas.width / 2,
-			y: this.canvas.height / 2,
+			x: this.canvas.width / 1.5,
+			y: this.canvas.height / 1.5,
 			opacity: 1
 		  };
 		  setTimeout(() => {
 			this.grow();
-		  }, 200);
+		  }, 100);
 		}
 	  });
 	}
